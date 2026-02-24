@@ -2,6 +2,7 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
+import initDb from './config/initDb';
 
 // 1. Load environment variables
 dotenv.config();
@@ -20,6 +21,18 @@ app.get('/ping', (req: Request, res: Response) => {
 });
 
 // 4. Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 Post Smith Engine running on http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    // Run the initialization script
+    await initDb();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Post Smith Engine running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
