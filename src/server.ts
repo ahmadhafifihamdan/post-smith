@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import initDb from './config/initDb';
 import authRoutes from './routes/auth.routes';
+import profileRoutes from './routes/profile.routes';
 
 // 1. Load environment variables
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(helmet()); // Protects headers
 app.use(cors());   // Allows frontend communication
 app.use(express.json()); // Parses incoming JSON bodies
 app.use('/auth', authRoutes); // Auth Routes
+app.use('/profile', profileRoutes); // Profile routes
 
 // 3. Health Check Route
 app.get('/ping', (req: Request, res: Response) => {
