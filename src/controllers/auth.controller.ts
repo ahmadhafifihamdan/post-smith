@@ -1,0 +1,63 @@
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import pool from '../config/db';
+
+export const register = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  // 1. Basic Validation
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // 2. Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 3. Insert User
+    const [userResult]: any = await connection.execute(
+      'INSERT INTO users (email, password_hash) VALUES (?, ?)',
+      [email, hashedPassword]
+    );
+    const userId = userResult.insertId;
+
+    // 4. Create Default Tone Profile
+    const defaultTone = JSON.stringify({
+      banned_words: [],
+      banned_phrases: [],
+      max_characters: 280,
+      preferred_structure: null
+    });
+
+    await connection.execute(
+      'INSERT INTO tone_profiles (user_id, config_json) VALUES (?, ?)',
+      [userId, defaultTone]
+    );
+
+    // Commit insertions
+    await connection.commit();
+
+    res.status(201).json({ 
+      message: 'User registered successfully', 
+      userId 
+    });
+
+  } catch (error: any) {
+    await connection.rollback();
+
+    // Handle duplicate email error (MySQL Error Code 1062)
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Email already exists' });
+    }
+
+    console.error('Registration Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    connection.release();
+  }
+};
