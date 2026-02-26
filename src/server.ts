@@ -6,6 +6,7 @@ import initDb from './config/initDb';
 import authRoutes from './routes/auth.routes';
 import profileRoutes from './routes/profile.routes';
 import generateRoutes from './routes/generate.routes';
+import { startWorker } from './services/worker.service';
 
 // 1. Load environment variables
 dotenv.config();
@@ -35,6 +36,7 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(`🚀 Post Smith Engine running on http://localhost:${PORT}`);
+      startWorker();
     });
   } catch (error) {
     console.error('Failed to start server:', error);
