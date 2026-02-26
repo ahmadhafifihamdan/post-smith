@@ -40,3 +40,27 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getProfile = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({ error: 'User ID not found.' });
+  }
+
+  try {
+    const [rows]: any = await pool.execute(
+      'SELECT config_json FROM tone_profiles WHERE user_id = ?',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Profile not found.' });
+    }
+    res.status(200).json(rows[0].config_json);
+
+  } catch (error) {
+    console.error('Get Profile Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
