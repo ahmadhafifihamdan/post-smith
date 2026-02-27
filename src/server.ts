@@ -6,6 +6,7 @@ import initDb from './config/initDb';
 import authRoutes from './routes/auth.routes';
 import profileRoutes from './routes/profile.routes';
 import generateRoutes from './routes/generate.routes';
+import generationRoutes from './routes/generation.routes';
 import { startWorker } from './services/worker.service';
 
 // 1. Load environment variables
@@ -22,6 +23,7 @@ app.use(express.json()); // Parses incoming JSON bodies
 app.use('/auth', authRoutes); // Auth Routes
 app.use('/profile', profileRoutes); // Profile routes
 app.use('/generate', generateRoutes); // Generate routes
+app.use('/generation', generationRoutes); // Generate routes
 
 // 3. Health Check Route
 app.get('/ping', (req: Request, res: Response) => {
