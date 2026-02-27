@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import pool from '../config/db';
 import { runGuardrails } from '../utils/guardrails.utils';
-import { config } from "dotenv";
 
 // The new client automatically looks for process.env.GEMINI_API_KEY
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
@@ -38,6 +37,10 @@ const processNextJob = async () => {
 
     await connection.execute('UPDATE generation_runs SET status = "processing" WHERE id = ?', [currentJobId]);
 
+    // logging LLM REQUEST TIMESTAMP
+    const requestTimestamp = new Date().toISOString();
+    console.log(`[LLM REQUEST] Run ID: ${currentJobId} | Timestamp: ${requestTimestamp}`);
+
     // Call LLM
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview", // Updated to the free tier model Gemini 3 Flash Preview
@@ -46,7 +49,10 @@ const processNextJob = async () => {
 
     const responseText = response.text;
 
-    if (!responseText) {
+    if (responseText) {
+      // Logging LLM SUCCESS CALL
+      console.log(`[LLM SUCCESS] Run ID: ${currentJobId} | Received ${responseText.length} chars`);
+    } else {
       throw new Error('LLM returned an empty response or was blocked by safety filters.');
     }
 
@@ -67,6 +73,7 @@ const processNextJob = async () => {
 
   } catch (error: any) {
     console.error('❌ Worker LLM Error:', error);
+    console.error(`[LLM FAILURE] Run ID: ${currentJobId} | Error: ${error.message}`);
     if (currentJobId) {
       await pool.execute(
         'UPDATE generation_runs SET status = "failed", error_message = ? WHERE id = ?',
