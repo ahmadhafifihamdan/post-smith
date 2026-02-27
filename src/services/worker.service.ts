@@ -1,5 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import pool from '../config/db';
+import { runGuardrails } from '../utils/guardrails.utils';
+import { config } from "dotenv";
 
 // The new client automatically looks for process.env.GEMINI_API_KEY
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
@@ -48,13 +50,20 @@ const processNextJob = async () => {
       throw new Error('LLM returned an empty response or was blocked by safety filters.');
     }
 
+    // introduce guard rails
+    const validation = runGuardrails(responseText, config_json);
+    if (!validation.isValid) {
+      console.log(`Fail to generate content. Reason: ${validation.reason}`);
+    }
+
+    // update generated_posts table with fail reason if fail the guard rails
     await connection.execute(
-      'INSERT INTO generated_posts (generation_run_id, content, status) VALUES (?, ?, ?)',
-      [currentJobId, responseText, 'accepted']
+      'INSERT INTO generated_posts (generation_run_id, content, status, rejection_reason) VALUES (?, ?, ?, ?)',
+      [currentJobId, responseText, validation.isValid ? 'accepted' : 'rejected', validation.reason || null]
     );
 
     await connection.execute('UPDATE generation_runs SET status = "completed" WHERE id = ?', [currentJobId]);
-    console.log(`✨ Post Smith generated content for Job ${currentJobId}`);
+    console.log(`Post Smith generated content for Job ${currentJobId}`);
 
   } catch (error: any) {
     console.error('❌ Worker LLM Error:', error);
