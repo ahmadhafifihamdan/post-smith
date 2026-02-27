@@ -25,12 +25,15 @@ app.use('/profile', profileRoutes); // Profile routes
 app.use('/generate', generateRoutes); // Generate routes
 app.use('/generation', generationRoutes); // Generate routes
 
-// 3. Health Check Route
-app.get('/ping', (req: Request, res: Response) => {
-  res.status(200).json({ message: 'pong', status: 'online' });
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'INTERNAL_SERVER_ERROR',
+    message: 'An unexpected error occurred on our end.' 
+  });
 });
 
-// 4. Start Server
+// Start Server
 const startServer = async () => {
   try {
     // Run the initialization script
