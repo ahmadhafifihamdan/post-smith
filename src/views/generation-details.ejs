@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Post Status | PostSmith</title>
+    <style>
+        .status-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .rejected {
+            border: 2px solid #f8d7da;
+            background: #fff5f5;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .accepted {
+            border: 2px solid #d4edda;
+            background: #fafffa;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .reason {
+            color: #721c24;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/dashboard">← Back to Dashboard</a>
+    <h1>Generation Status</h1>
+
+    <div class="card">
+        <p><strong>Prompt:</strong>
+            <%= run.idea_prompt %>
+        </p>
+        <p><strong>Status:</strong> <span class="status-pill <%= run.status %>">
+                <%= run.status.toUpperCase() %>
+            </span></p>
+    </div>
+
+    <% if (run.status==='pending' || run.status==='processing' ) { %>
+        <p>🤖 AI is working on your post... This page will refresh automatically.</p>
+        <div id="status-marker" data-status="<%= run.status %>"></div>
+        <script src="/js/refresher.js"></script>
+        <% } %>
+
+            <% if (run.status==='completed' ) { %>
+                <h2>Results</h2>
+                <% posts.forEach(post=> { %>
+                    <div class="<%= post.status === 'accepted' ? 'accepted' : 'rejected' %>">
+                        <p>
+                            <%= post.content %>
+                        </p>
+                        <% if (post.status==='rejected' ) { %>
+                            <p class="reason">🚫 Rejected: <%= post.rejection_reason %>
+                            </p>
+                            <% } else { %>
+                                <p class="success">✅ Ready to post!</p>
+                                <% } %>
+                    </div>
+                    <% }) %>
+                        <% } %>
+
+                            <% if (run.status==='failed' ) { %>
+                                <div class="rejected">
+                                    <p><strong>Error:</strong>
+                                        <%= run.error_message %>
+                                    </p>
+                                </div>
+                                <% } %>
+</body>
+
+</html>

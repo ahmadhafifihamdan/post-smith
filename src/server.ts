@@ -10,7 +10,7 @@ import generationRoutes from './routes/generation.routes';
 import { startWorker } from './services/worker.service';
 import viewRoutes from './routes/view.routes';
 import cookieParser from 'cookie-parser';
-
+import path from 'path';
 
 // 1. Load environment variables
 dotenv.config();
@@ -23,6 +23,7 @@ app.use(helmet()); // Protects headers
 app.use(cors());   // Allows frontend communication
 app.use(express.urlencoded({ extended: true })); // Handle HTML submission
 app.use(express.json()); // Parses incoming JSON bodies
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(cookieParser());
 app.set('view engine', 'ejs');
