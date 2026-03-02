@@ -5,7 +5,7 @@ import { authenticate } from '../middleware/auth.middleware';
 const router = Router();
 
 // Only logged-in users can update and check their profile.
-router.put('/', authenticate, updateProfile);
+router.post('/', authenticate, updateProfile);
 router.get('/', authenticate, getProfile);
 
 export default router;

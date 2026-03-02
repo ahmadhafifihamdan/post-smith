@@ -7,23 +7,19 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  // 1. Get token from header
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
+  // 1. Get token from header or cookies
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies.token; 
 
   if (!token) {
-    return res.status(401).json({ error: 'Access denied. No token provided.' });
+    return res.status(401).redirect('/login'); // Redirect to login if no token
   }
 
   try {
-    // 2. Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { userId: number };
-    
-    // 3. Attach userId to the request object for use in other routes
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number };
     req.userId = decoded.userId;
-    
-    next(); // Move to the next function/controller
+    next();
   } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token.' });
+    res.clearCookie('token');
+    return res.status(401).redirect('/login');
   }
 };

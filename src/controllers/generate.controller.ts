@@ -16,11 +16,11 @@ export const createJob = async (req: AuthRequest, res: Response) => {
       [userId, idea_prompt, 'pending']
     );
 
-    // Return the ID immediately so the frontend can "poll" or wait
-    res.status(202).json({ 
-      message: 'Generation started', 
-      generation_run_id: result.insertId 
-    });
+    const runId = result.insertId;
+
+    if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+      return res.redirect(`/generations/${runId}`);
+    }
   } catch (error) {
     console.error('Create Job Error:', error);
     res.status(500).json({ error: 'Internal server error' });

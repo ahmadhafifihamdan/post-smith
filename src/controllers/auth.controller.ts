@@ -96,11 +96,14 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '24h' }
     );
 
-    // 5. Return token
-    res.status(200).json({
-      message: 'Login successful',
-      token
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
+
+    if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+      return res.redirect('/dashboard');
+    }
 
   } catch (error) {
     console.error('Login Error:', error);

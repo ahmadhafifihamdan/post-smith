@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AI Post Generator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f4f4f9;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .logout {
+            float: right;
+            color: #dc3545;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/auth/logout" class="logout">Logout</a>
+    <h1>Welcome to your Dashboard</h1>
+
+    <section class="card">
+        <h2>1. Configure Your Tone</h2>
+        <form action="/profile" method="POST">
+            <div class="form-group">
+                <label for="max_characters">Max Characters:</label>
+                <input type="number" id="max_characters" name="max_characters" value="<%= profile.max_characters %>"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="banned_words">Banned Words:</label>
+                <input type="text" id="banned_words" name="banned_words"
+                    value="<%= profile.banned_words ? profile.banned_words.join(', ') : '' %>"
+                    placeholder="Enter words separated by commas (e.g., guarantee, cheap)">
+            </div>
+
+            <div class="form-group">
+                <label for="banned_phrases">Banned Phrases:</label>
+                <textarea id="banned_phrases" name="banned_phrases"
+                    placeholder="Enter phrases separated by new lines..."><%= profile.banned_phrases ? profile.banned_phrases.join('\n') : '' %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="preferred_structure">Preferred Structure (Optional):</label>
+                <textarea id="preferred_structure" name="preferred_structure"
+                    placeholder="e.g., Start with a hook, followed by 3 bullet points, and end with a CTA."><%= profile.preferred_structure || '' %></textarea>
+            </div>
+            <button type="submit">Update Tone Profile</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>2. Generate a Post</h2>
+        <form action="/generate" method="POST">
+            <div class="form-group">
+                <label for="idea_prompt">What's your idea?</label>
+                <textarea id="idea_prompt" name="idea_prompt"
+                    placeholder="e.g., A post about the benefits of drinking water early in the morning"
+                    required></textarea>
+            </div>
+            <button type="submit" style="background: #28a745;">Generate Async Job</button>
+        </form>
+    </section>
+</body>
+
+</html>
